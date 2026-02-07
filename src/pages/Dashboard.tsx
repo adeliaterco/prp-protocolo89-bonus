@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lock, Unlock, CheckCircle, Star, Users, ShieldCheck, Sparkles } from 'lucide-react';
+import { Lock, Unlock, CheckCircle, Star, Users, ShieldCheck, Sparkles, ExternalLink } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProgressBar from '@/components/ProgressBar';
@@ -93,6 +93,7 @@ interface ModuleCardProps {
   socialProof?: { buyers: number; successRate: number };
   onClick: () => void;
   icon: React.ReactNode;
+  isExternal?: boolean; // 🆕 NOVO: Indica se é link externo
 }
 
 const ModuleCard = ({ 
@@ -104,7 +105,8 @@ const ModuleCard = ({
   price, 
   socialProof,
   onClick,
-  icon
+  icon,
+  isExternal = false // 🆕 NOVO: Padrão false
 }: ModuleCardProps) => {
   return (
     <motion.div
@@ -131,6 +133,14 @@ const ModuleCard = ({
       `}>
         {isUnlocked ? '✅ Desbloqueado' : '🔒 Bloqueado'}
       </div>
+
+      {/* 🆕 NOVO: Badge de Link Externo */}
+      {isUnlocked && isExternal && (
+        <div className="absolute -top-3 right-6 px-3 py-1 rounded-full text-xs font-semibold bg-primary/20 text-primary flex items-center gap-1">
+          <ExternalLink className="w-3 h-3" />
+          Contenido Exclusivo
+        </div>
+      )}
 
       {/* Module Header */}
       <div className="flex items-start gap-4 mt-2">
@@ -190,7 +200,7 @@ const ModuleCard = ({
       <div className="mt-6">
         <button
           className={`
-            w-full py-3 rounded-xl font-semibold transition-all
+            w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2
             ${isUnlocked 
               ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
               : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -198,7 +208,12 @@ const ModuleCard = ({
           `}
         >
           {isUnlocked 
-            ? (progress && progress > 0 ? 'Continuar' : 'Comenzar') 
+            ? (
+                <>
+                  {isExternal ? 'Acceder al Protocolo' : (progress && progress > 0 ? 'Continuar' : 'Comenzar')}
+                  {isExternal && <ExternalLink className="w-4 h-4" />}
+                </>
+              )
             : 'Desbloquear Ahora'
           }
         </button>
@@ -234,15 +249,15 @@ const Dashboard = () => {
       isUnlocked: true,
       progress: user.modulo_1_progreso,
       icon: <Sparkles className="w-7 h-7" />,
+      isExternal: false,
     },
     {
       number: 2,
       title: 'Protocolo 89: Scripts Exactos',
-      description: 'Scripts Exactos Para Reconquistarla',
-      isUnlocked: user.modulo_2_liberado,
-      price: '$17',
-      socialProof: { buyers: 15, successRate: 97 },
+      description: 'Scripts Exactos Para Reconquistarla. Accede al protocolo completo ahora mismo.',
+      isUnlocked: true, // 🔥 LIBERADO PERMANENTEMENTE
       icon: <ShieldCheck className="w-7 h-7" />,
+      isExternal: true, // 🆕 Indica que é link externo
     },
     {
       number: 3,
@@ -252,6 +267,7 @@ const Dashboard = () => {
       price: '$37',
       socialProof: { buyers: 12, successRate: 98 },
       icon: <Lock className="w-7 h-7" />,
+      isExternal: false,
     },
   ];
 
@@ -259,11 +275,8 @@ const Dashboard = () => {
     if (moduleNumber === 1) {
       navigate('/modulo1');
     } else if (moduleNumber === 2) {
-      if (user.modulo_2_liberado) {
-        navigate('/modulo2');
-      } else {
-        setPurchaseModal({ isOpen: true, module: 2 });
-      }
+      // 🔥 MÓDULO 2 AGORA ABRE LINK EXTERNO DIRETO
+      window.open('https://scriptsexatos.vercel.app', '_blank');
     } else if (moduleNumber === 3) {
       if (user.modulo_3_liberado) {
         navigate('/modulo3');
@@ -334,6 +347,7 @@ const Dashboard = () => {
                   socialProof={module.socialProof}
                   onClick={() => handleModuleClick(module.number)}
                   icon={module.icon}
+                  isExternal={module.isExternal} // 🆕 Passa a prop
                 />
               ))}
             </div>
@@ -390,19 +404,19 @@ const Dashboard = () => {
 
       <Footer />
 
-      {/* Purchase Modal */}
+      {/* Purchase Modal - AGORA SÓ PARA MÓDULO 3 */}
       {purchaseModal && (
         <ModulePurchaseModal
           isOpen={purchaseModal.isOpen}
           onClose={() => setPurchaseModal(null)}
           moduleNumber={purchaseModal.module}
-          title={purchaseModal.module === 2 ? 'Protocolo 89: Scripts Exactos' : 'Blindaje Emocional'}
+          title={purchaseModal.module === 3 ? 'Blindaje Emocional' : 'Protocolo 89: Scripts Exactos'}
           description={
-            purchaseModal.module === 2
-              ? 'Scripts Exactos Para Reconquistarla'
-              : 'Cómo mantener la obsesión por 30 días'
+            purchaseModal.module === 3
+              ? 'Cómo mantener la obsesión por 30 días'
+              : 'Scripts Exactos Para Reconquistarla'
           }
-          price={purchaseModal.module === 2 ? '$17' : '$37'}
+          price={purchaseModal.module === 3 ? '$37' : '$17'}
         />
       )}
     </div>
