@@ -27,12 +27,10 @@ const Module2Dashboard = () => {
       return;
     }
 
-    const userData = getUser();
-    if (!userData?.modulo_2_liberado) {
-      navigate('/dashboard');
-      return;
-    }
+    // 🔥 VERIFICAÇÃO DE BLOQUEIO REMOVIDA - MÓDULO 2 SEMPRE ACESSÍVEL
 
+    const userData = getUser();
+    
     // Check if should show upsell (80% progress = lesson 6 completed)
     if (userData && userData.modulo_2_progreso >= 80 && !userData.modulo_3_liberado) {
       const timer = setTimeout(() => {
@@ -42,7 +40,8 @@ const Module2Dashboard = () => {
     }
   }, [navigate]);
 
-  if (!user || !user.modulo_2_liberado) return null;
+  // 🔥 VERIFICAÇÃO REMOVIDA - AGORA SÓ VALIDA SE USER EXISTE
+  if (!user) return null;
 
   const completedLessons = user.modulo_2_lecciones_completadas?.length || 0;
   const progress = user.modulo_2_progreso || 0;
@@ -199,7 +198,6 @@ const Module2Dashboard = () => {
               {module2Lessons.map((lesson) => (
                 <LessonCard
                   key={lesson.id}
-                  id={lesson.id}
                   title={lesson.title}
                   subtitle={lesson.subtitle}
                   icon={lesson.icon}
