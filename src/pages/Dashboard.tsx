@@ -11,7 +11,7 @@ import { useEffect } from 'react';
 interface ModulePurchaseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  moduleNumber: 2 | 3;
+  moduleNumber: 2;
   title: string;
   description: string;
   price: string;
@@ -19,7 +19,6 @@ interface ModulePurchaseModalProps {
 
 const HOTMART_LINKS = {
   2: 'https://pay.hotmart.com/D100233207O?off=hgjszxx1',
-  3: 'https://pay.hotmart.com/N100448107A?off=fh6ck4c7',
 };
 
 const ModulePurchaseModal = ({ isOpen, onClose, moduleNumber, title, description, price }: ModulePurchaseModalProps) => {
@@ -93,6 +92,7 @@ interface ModuleCardProps {
   socialProof?: { buyers: number; successRate: number };
   onClick: () => void;
   icon: React.ReactNode;
+  isComingSoon?: boolean;
 }
 
 const ModuleCard = ({ 
@@ -104,44 +104,51 @@ const ModuleCard = ({
   price, 
   socialProof,
   onClick,
-  icon
+  icon,
+  isComingSoon = false
 }: ModuleCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: moduleNumber * 0.1 }}
-      whileHover={{ y: -4, boxShadow: '0 8px 30px rgba(0,0,0,0.12)' }}
-      onClick={onClick}
+      whileHover={!isComingSoon ? { y: -4, boxShadow: '0 8px 30px rgba(0,0,0,0.12)' } : {}}
+      onClick={!isComingSoon ? onClick : undefined}
       className={`
-        relative p-6 rounded-2xl cursor-pointer transition-all duration-300
-        ${isUnlocked 
-          ? 'bg-card border-2 border-success shadow-lg' 
-          : 'bg-muted/30 border-2 border-border opacity-90'
+        relative p-6 rounded-2xl transition-all duration-300
+        ${isComingSoon 
+          ? 'bg-muted/30 border-2 border-border opacity-60 cursor-not-allowed' 
+          : isUnlocked 
+          ? 'bg-card border-2 border-success shadow-lg cursor-pointer' 
+          : 'bg-muted/30 border-2 border-border opacity-90 cursor-pointer'
         }
       `}
     >
       {/* Status Badge */}
       <div className={`
         absolute -top-3 left-6 px-3 py-1 rounded-full text-xs font-semibold
-        ${isUnlocked 
+        ${isComingSoon
+          ? 'bg-warning text-warning-foreground'
+          : isUnlocked 
           ? 'bg-success text-success-foreground' 
           : 'bg-muted text-muted-foreground'
         }
       `}>
-        {isUnlocked ? '✅ Desbloqueado' : '🔒 Bloqueado'}
+        {isComingSoon ? '⏰ Pronto' : isUnlocked ? '✅ Desbloqueado' : '🔒 Bloqueado'}
       </div>
 
       {/* Module Header */}
       <div className="flex items-start gap-4 mt-2">
         <div className={`
           w-14 h-14 rounded-xl flex items-center justify-center shrink-0
-          ${isUnlocked ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}
+          ${isComingSoon
+            ? 'bg-warning/10 text-warning'
+            : isUnlocked ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}
         `}>
           {icon}
         </div>
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-medium ${isUnlocked ? 'text-success' : 'text-muted-foreground'}`}>
+          <p className={`text-sm font-medium ${isComingSoon ? 'text-warning' : isUnlocked ? 'text-success' : 'text-muted-foreground'}`}>
             MÓDULO {moduleNumber}
           </p>
           <h3 className="font-display text-xl font-bold truncate">{title}</h3>
@@ -160,18 +167,24 @@ const ModuleCard = ({
         </div>
       )}
 
-      {/* Price (only for locked modules) */}
-      {!isUnlocked && price && (
+      {/* Price or Coming Soon (only for locked modules) */}
+      {!isUnlocked && (
         <div className="mt-4 flex items-center justify-between">
           <div>
-            <p className="text-2xl font-bold text-primary">{price}</p>
-            <p className="text-xs text-muted-foreground">Acceso de por vida</p>
+            {isComingSoon ? (
+              <p className="text-lg font-bold text-warning">Actualización en breve</p>
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-primary">{price}</p>
+                <p className="text-xs text-muted-foreground">Acceso de por vida</p>
+              </>
+            )}
           </div>
         </div>
       )}
 
-      {/* Social Proof (only for locked modules) */}
-      {!isUnlocked && socialProof && (
+      {/* Social Proof (only for locked modules that aren't coming soon) */}
+      {!isUnlocked && !isComingSoon && socialProof && (
         <div className="mt-4 pt-4 border-t border-border">
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
@@ -189,15 +202,20 @@ const ModuleCard = ({
       {/* CTA Button */}
       <div className="mt-6">
         <button
+          disabled={isComingSoon}
           className={`
             w-full py-3 rounded-xl font-semibold transition-all
-            ${isUnlocked 
+            ${isComingSoon
+              ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
+              : isUnlocked 
               ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
               : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }
           `}
         >
-          {isUnlocked 
+          {isComingSoon
+            ? 'Actualización en breve'
+            : isUnlocked 
             ? (progress && progress > 0 ? 'Continuar' : 'Comenzar') 
             : 'Desbloquear Ahora'
           }
@@ -210,7 +228,7 @@ const ModuleCard = ({
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(getUser());
-  const [purchaseModal, setPurchaseModal] = useState<{ isOpen: boolean; module: 2 | 3 } | null>(null);
+  const [purchaseModal, setPurchaseModal] = useState<{ isOpen: boolean; module: 2 } | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -234,22 +252,23 @@ const Dashboard = () => {
       isUnlocked: true,
       progress: user.modulo_1_progreso,
       icon: <Sparkles className="w-7 h-7" />,
+      isComingSoon: false,
     },
     {
       number: 2,
       title: 'Protocolo 89: Scripts Exactos',
       description: 'Scripts Exactos Para Reconquistarla. Accede al protocolo completo ahora mismo.',
-      isUnlocked: true, // 🔥 LIBERADO PERMANENTEMENTE
+      isUnlocked: true,
       icon: <ShieldCheck className="w-7 h-7" />,
+      isComingSoon: false,
     },
     {
       number: 3,
       title: 'Blindaje Emocional',
       description: 'Cómo mantener la obsesión por 30 días. Incluye acceso a comunidad exclusiva.',
-      isUnlocked: user.modulo_3_liberado,
-      price: '$37',
-      socialProof: { buyers: 12, successRate: 98 },
+      isUnlocked: false,
       icon: <Lock className="w-7 h-7" />,
+      isComingSoon: true,
     },
   ];
 
@@ -257,14 +276,9 @@ const Dashboard = () => {
     if (moduleNumber === 1) {
       navigate('/modulo1');
     } else if (moduleNumber === 2) {
-      // 🔥 NAVEGAÇÃO INTERNA - MANTÉM DENTRO DO APP
       navigate('/modulo2');
     } else if (moduleNumber === 3) {
-      if (user.modulo_3_liberado) {
-        navigate('/modulo3');
-      } else {
-        setPurchaseModal({ isOpen: true, module: 3 });
-      }
+      // No hacer nada - módulo está en "Actualización en breve"
     }
   };
 
@@ -277,19 +291,19 @@ const Dashboard = () => {
 
   const testimonials = [
     { 
-      text: 'El Módulo 1 me dio esperanza, pero el Protocolo 89 cambió todo. Ella ahora me busca a mí.', 
+      text: 'El Módulo 1 (PRP RECONQUISTA) me dio esperanza y cambió todo. Me ayudó bastante el protocolo PRP, tanto que ahora tengo claridad absoluta sobre mis pasos.', 
       author: 'Juan M.',
-      highlight: 'Protocolo de Dominancia'
+      highlight: 'Protocolo PRP'
     },
     { 
-      text: 'Reconquisté con el Módulo 1, pero casi la pierdo de nuevo. El Blindaje Emocional salvó mi relación.', 
+      text: 'Los scripts me han ayudado mucho, facilitó demais a minha reconquista, facilitó demais a minha comunicación con ella. Los scripts exactos funcionan increíblemente bien.', 
       author: 'Carlos R.',
-      highlight: 'Blindaje Emocional'
+      highlight: 'Scripts Exactos'
     },
     { 
-      text: 'Hice los 3 módulos. Sin el Protocolo y el Blindaje, hubiera sido solo una reconciliación temporal.', 
+      text: 'Los Módulos 1 y 2 disponibles me han ayudado enormemente. El Protocolo PRP y los Scripts Exactos funcionan a la perfección.', 
       author: 'Roberto P.',
-      highlight: 'Los 3 módulos'
+      highlight: 'PRP + Scripts'
     },
   ];
 
@@ -325,10 +339,9 @@ const Dashboard = () => {
                   description={module.description}
                   isUnlocked={module.isUnlocked}
                   progress={module.progress}
-                  price={module.price}
-                  socialProof={module.socialProof}
-                  onClick={() => handleModuleClick(module.number)}
                   icon={module.icon}
+                  isComingSoon={module.isComingSoon}
+                  onClick={() => handleModuleClick(module.number)}
                 />
               ))}
             </div>
@@ -385,19 +398,15 @@ const Dashboard = () => {
 
       <Footer />
 
-      {/* Purchase Modal - AGORA SÓ PARA MÓDULO 3 */}
+      {/* Purchase Modal */}
       {purchaseModal && (
         <ModulePurchaseModal
           isOpen={purchaseModal.isOpen}
           onClose={() => setPurchaseModal(null)}
           moduleNumber={purchaseModal.module}
-          title={purchaseModal.module === 3 ? 'Blindaje Emocional' : 'Protocolo 89: Scripts Exactos'}
-          description={
-            purchaseModal.module === 3
-              ? 'Cómo mantener la obsesión por 30 días'
-              : 'Scripts Exactos Para Reconquistarla'
-          }
-          price={purchaseModal.module === 3 ? '$37' : '$17'}
+          title='Protocolo 89: Scripts Exactos'
+          description='Scripts Exactos Para Reconquistarla'
+          price='$17'
         />
       )}
     </div>
