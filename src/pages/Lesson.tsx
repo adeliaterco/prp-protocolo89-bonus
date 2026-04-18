@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, Image as ImageIcon, Lock, Sparkles } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import UpsellModal from '@/components/UpsellModal';
+// ❌ REMOVIDO: import UpsellModal from '@/components/UpsellModal';
 import QuestionField, { Question } from '@/components/QuestionField';
 import { getLessonById, getNextLessonId, getPreviousLessonId, lessonQuestions } from '@/data/lessons';
 import { getUser, completeLesson, isAuthenticated, isOnboardingComplete, saveLessonResponses, getLessonResponses, LessonResponses } from '@/lib/storage';
@@ -12,7 +12,7 @@ import { getUser, completeLesson, isAuthenticated, isOnboardingComplete, saveLes
 const Lesson = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [showUpsell, setShowUpsell] = useState(false);
+  // ❌ REMOVIDO: const [showUpsell, setShowUpsell] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const [responses, setResponses] = useState<LessonResponses>({});
@@ -105,10 +105,8 @@ const Lesson = () => {
     
     const updatedUser = completeLesson(lessonId);
     
-    // Check if should show upsell (after completing lesson 6)
-    if (lessonId === 6 && updatedUser && !updatedUser.modulo_2_liberado) {
-      setShowUpsell(true);
-    } else if (nextLessonId) {
+    // Avança para a próxima lição normalmente (sem popup)
+    if (nextLessonId) {
       navigate(`/lesson/${nextLessonId}`);
     } else {
       navigate('/dashboard');
@@ -404,17 +402,7 @@ const Lesson = () => {
 
       <Footer />
 
-      <UpsellModal 
-        isOpen={showUpsell} 
-        onClose={() => {
-          setShowUpsell(false);
-          if (nextLessonId) {
-            navigate(`/lesson/${nextLessonId}`);
-          } else {
-            navigate('/dashboard');
-          }
-        }} 
-      />
+      {/* ❌ REMOVIDO: <UpsellModal isOpen={showUpsell} onClose={() => {...}} /> */}
     </div>
   );
 };
