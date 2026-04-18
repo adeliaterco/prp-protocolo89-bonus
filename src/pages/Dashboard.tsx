@@ -247,7 +247,7 @@ const Dashboard = () => {
   const modules = [
     {
       number: 1,
-      title: 'PRP RECONQUISTA',
+      title: 'MRD RECONQUISTA',
       description: 'Aprende los fundamentos de la reconquista en 7 lecciones prácticas y efectivas.',
       isUnlocked: true,
       progress: user.modulo_1_progreso,
@@ -291,9 +291,9 @@ const Dashboard = () => {
 
   const testimonials = [
     { 
-      text: 'El Módulo 1 (PRP RECONQUISTA) me dio esperanza y cambió todo. Me ayudó bastante el protocolo PRP, tanto que ahora tengo claridad absoluta sobre mis pasos.', 
+      text: 'El Módulo 1 (MRD RECONQUISTA) me dio esperanza y cambió todo. Me ayudó bastante el protocolo MRD, tanto que ahora tengo claridad absoluta sobre mis pasos.', 
       author: 'Juan M.',
-      highlight: 'Protocolo PRP'
+      highlight: 'Protocolo MRD'
     },
     { 
       text: 'Los scripts me han ayudado mucho, facilitó demais a minha reconquista, facilitó demais a minha comunicación con ella. Los scripts exactos funcionan increíblemente bien.', 
@@ -301,9 +301,9 @@ const Dashboard = () => {
       highlight: 'Scripts Exactos'
     },
     { 
-      text: 'Los Módulos 1 y 2 disponibles me han ayudado enormemente. El Protocolo PRP y los Scripts Exactos funcionan a la perfección.', 
+      text: 'Los Módulos 1 y 2 disponibles me han ayudado enormemente. El Protocolo MRD y los Scripts Exactos funcionan a la perfección.', 
       author: 'Roberto P.',
-      highlight: 'PRP + Scripts'
+      highlight: 'MRD + Scripts'
     },
   ];
 

@@ -77,7 +77,7 @@ const Module1Dashboard = () => {
               ¡Bienvenido, {user.nombre}!
             </h1>
             <p className="text-muted-foreground text-lg">
-              Tu progreso en PRP RECONQUISTA
+              Tu progreso en MRD RECONQUISTA
             </p>
           </motion.div>
 
